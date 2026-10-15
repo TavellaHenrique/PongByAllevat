@@ -29,10 +29,13 @@ class Game:
         self.fonte_mensagem = pygame.font.Font(None, 36)
         self.fonte_ajuda = pygame.font.Font(None, 26)
         
-        # Modo de jogo
+        # Modo de jogo inicialmente selecionado
         self.modo = "Computer"
-        # Controlador de movimentos da IA
+        # Conecta o controlador da IA
         self.ia = AIController()
+        
+        # Carrega a pontuação de vitória
+        self.pontos_para_vencer = PONTOS_PARA_VENCER
         
         self.reset()
 
@@ -125,11 +128,11 @@ class Game:
             self.estado = self.READY
 
         # Verifica se a partida terminou.
-        if self.placar_esquerda >= PONTOS_PARA_VENCER:
+        if self.placar_esquerda >= self.pontos_para_vencer:
             self.vencedor = "Jogador 1"
             self.estado = self.GAME_OVER
 
-        elif self.placar_direita >= PONTOS_PARA_VENCER:
+        elif self.placar_direita >= self.pontos_para_vencer:
             self.vencedor = "Jogador 2"
             self.estado = self.GAME_OVER
 
@@ -226,16 +229,26 @@ class Game:
                 tela,
                 modo_texto,
                 self.fonte_ajuda,
-                COR_TEXTO,
+                COR_DESTAQUE,
                 ALTURA // 2 + 65
             )
+            
+            pontos_texto = f"Pontos para vencer: {self.pontos_para_vencer}"
 
             self.desenhar_texto_centralizado(
                 tela,
-                f"Partida até {PONTOS_PARA_VENCER} pontos",
+                pontos_texto,
                 self.fonte_ajuda,
-                COR_TEXTO,
+                COR_DESTAQUE,
                 ALTURA // 2 + 100
+            )
+            
+            self.desenhar_texto_centralizado(
+            	tela,
+            	"[Setas ESQUERDA/DIREITA para aumentar/diminuir]",
+            	self.fonte_ajuda,
+            	COR_TEXTO,
+            	ALTURA // 2 + 120
             )
 
         # Preparação para o saque.
