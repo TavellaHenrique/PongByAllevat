@@ -400,9 +400,9 @@ class Game:
         self.bola.draw(tela)
         
         if self.modo == "computer":
-        	controles = "W / S: Mover raquete | ESC: Sair"
+        	controles = "W/S: Mover raquete - R: Menu - ESC: Sair"
         else:
-        	controles = "W / S: Jogador 1 | Setas: Jogador 2"
+        	controles = "W/S: Jogador 1 - Setas: Jogador 2 - R: Menu - ESC: Sair"
         	
        	self.desenhar_texto_centralizado(
        		tela,
@@ -430,10 +430,19 @@ class Game:
                 ALTURA // 2 + 5
             )
             
+            self.desenhar_texto_centralizado(
+            	tela,
+            	"[1] Contra computador [2] Contra jogador",
+            	self.fonte_ajuda,
+            	COR_TEXTO,
+            	ALTURA // 2 + 45
+            )
+            
             modo_texto = (
-                "Modo: Jogador vs Computador [1]"
+            	f"Modo selecionado: " +
+                ("[1]"
                 if self.modo == "computer"
-                else "Modo: Dois jogadores [2]"
+                else "[2]")
             )
             
             self.desenhar_texto_centralizado(
@@ -441,7 +450,7 @@ class Game:
                 modo_texto,
                 self.fonte_ajuda,
                 COR_TEXTO,
-                ALTURA // 2 + 50
+                ALTURA // 2 + 65
             )
 
             self.desenhar_texto_centralizado(
@@ -449,7 +458,7 @@ class Game:
                 f"Partida até {PONTOS_PARA_VENCER} pontos",
                 self.fonte_ajuda,
                 COR_TEXTO,
-                ALTURA // 2 + 85
+                ALTURA // 2 + 100
             )
 
         # Preparação para o saque.
@@ -479,6 +488,14 @@ class Game:
                 COR_OBJETOS,
                 ALTURA // 2 + 35
             )
+            
+    def voltar_ao_menu(self):
+    	self.estado = self.MENU
+    	self.placar_esquerda = 0
+    	self.placar_direita = 0
+    	self.vencedor = None
+    	self.bola.reset()
+    	
 
 # ==================================================
 # LOOP PRINCIPAL
@@ -517,6 +534,10 @@ def main():
             	
             	elif evento.key == pygame.K_RETURN:
             		jogo.iniciar_saque()
+            		
+            	elif evento.key == pygame.K_r:
+            		if jogo.estado != Game.MENU:
+            			jogo.voltar_ao_menu()
             	
             	elif (
             		evento.key == pygame.K_r
