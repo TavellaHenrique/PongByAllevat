@@ -180,9 +180,9 @@ class Game:
         self.bola.draw(tela)
         
         if self.modo == "computer":
-        	controles = "W/S: Mover raquete - R: Menu - ESC: Sair"
+        	controles = "[W/S: Mover raquete]"
         else:
-        	controles = "W/S: Jogador 1 - Setas: Jogador 2 - R: Menu - ESC: Sair"
+        	controles = "[W/S: Jogador 1] [Setas: Jogador 2]"
         	
        	self.desenhar_texto_centralizado(
        		tela,
@@ -190,6 +190,14 @@ class Game:
        		self.fonte_ajuda,
        		COR_TEXTO,
        		ALTURA - 48
+       	)
+       	
+       	self.desenhar_texto_centralizado(
+       		tela,
+       		"[R: Voltar ao menu] [ESC: Sair]",
+       		self.fonte_ajuda,
+       		COR_TEXTO,
+       		ALTURA - 20
        	)
 
         # Menu inicial.
@@ -207,15 +215,7 @@ class Game:
                 "Pressione ENTER para iniciar o jogo",
                 self.fonte_mensagem,
                 COR_OBJETOS,
-                ALTURA // 2 + 5
-            )
-            
-            self.desenhar_texto_centralizado(
-            	tela,
-            	"[1] Contra computador [2] Contra jogador",
-            	self.fonte_ajuda,
-            	COR_TEXTO,
-            	ALTURA // 2 + 45
+                ALTURA // 2 - 30
             )
             
             modo_texto = (
@@ -230,7 +230,15 @@ class Game:
                 modo_texto,
                 self.fonte_ajuda,
                 COR_DESTAQUE,
-                ALTURA // 2 + 65
+                ALTURA // 2 + 45
+            )
+            
+            self.desenhar_texto_centralizado(
+            	tela,
+            	"[1] Contra computador [2] Contra jogador",
+            	self.fonte_ajuda,
+            	COR_TEXTO,
+            	ALTURA // 2 + 65
             )
             
             pontos_texto = f"Pontos para vencer: {self.pontos_para_vencer}"
@@ -245,7 +253,7 @@ class Game:
             
             self.desenhar_texto_centralizado(
             	tela,
-            	"[Setas ESQUERDA/DIREITA para aumentar/diminuir]",
+            	"[Setas ESQUERDA/DIREITA]",
             	self.fonte_ajuda,
             	COR_TEXTO,
             	ALTURA // 2 + 120
@@ -258,7 +266,7 @@ class Game:
                 "Pressione ENTER para sacar",
                 self.fonte_mensagem,
                 COR_DESTAQUE,
-                ALTURA // 2
+                ALTURA // 2 + 30
             )
 
         # Tela de vitória.
