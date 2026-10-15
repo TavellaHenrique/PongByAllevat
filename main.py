@@ -14,7 +14,7 @@ FPS = 60
 # Cores
 COR_FUNDO = (18, 20, 30)
 COR_OBJETOS = (235, 240, 255)
-COR_DESTAQUE = (80, 220, 160)
+COR_DESTAQUE = (175, 50, 50)
 COR_TEXTO = (180, 190, 210)
 
 # Raquete
@@ -191,7 +191,13 @@ class Ball:
 # ==================================================
 
 class Game:
+    MENU = "menu"
+    READY = "ready"
+    PLAYING = "playing"
+    GAME_OVER = "game_over"
+
     def __init__(self):
+        self.fonte_titulo = pygame.font.Font(None, 76)
         self.fonte_placar = pygame.font.Font(None, 64)
         self.fonte_mensagem = pygame.font.Font(None, 36)
         self.fonte_ajuda = pygame.font.Font(None, 26)
@@ -215,19 +221,32 @@ class Game:
         self.placar_direita = 0
         self.vencedor = None
 
+        # O jogo começa no menu, sem movimentar a bola.
+        self.estado = self.MENU
+
+    def iniciar_saque(self):
+        if self.estado == self.MENU:
+            # Primeiro Enter: prepara a partida.
+            self.estado = self.READY
+
+        elif self.estado == self.READY:
+            # Segundo Enter: inicia o movimento da bola.
+            self.estado = self.PLAYING
+
     def update(self, delta_time):
-        if self.vencedor is not None:
+        # No menu e após o fim, a partida fica parada.
+        if self.estado in (self.MENU, self.GAME_OVER):
             return
 
         teclas = pygame.key.get_pressed()
 
-        # Jogador da esquerda: W e S.
+        # Jogador 1: W e S.
         direcao_esquerda = (
             int(teclas[pygame.K_s])
             - int(teclas[pygame.K_w])
         )
 
-        # Jogador da direita: setas para cima e para baixo.
+        # Jogador 2: setas.
         direcao_direita = (
             int(teclas[pygame.K_DOWN])
             - int(teclas[pygame.K_UP])
@@ -241,6 +260,11 @@ class Game:
             direcao_direita, delta_time
         )
 
+        # Durante o saque, as raquetes podem se mover,
+        # mas a bola permanece parada.
+        if self.estado == self.READY:
+            return
+
         ponto = self.bola.update(
             delta_time,
             self.raquete_esquerda,
@@ -251,28 +275,42 @@ class Game:
             self.placar_esquerda += 1
             self.bola.reset(direcao=1)
 
+            # O jogo pausa para o próximo saque.
+            self.estado = self.READY
+
         elif ponto == "direita":
             self.placar_direita += 1
             self.bola.reset(direcao=-1)
 
-        # Verifica a condição de vitória.
+            self.estado = self.READY
+
+        # Verifica se a partida terminou.
         if self.placar_esquerda >= PONTOS_PARA_VENCER:
             self.vencedor = "Jogador 1"
+            self.estado = self.GAME_OVER
 
         elif self.placar_direita >= PONTOS_PARA_VENCER:
             self.vencedor = "Jogador 2"
+            self.estado = self.GAME_OVER
+
+    def desenhar_texto_centralizado(
+        self, tela, texto, fonte, cor, y
+    ):
+        superficie = fonte.render(texto, True, cor)
+        retangulo = superficie.get_rect(
+            center=(LARGURA // 2, y)
+        )
+        tela.blit(superficie, retangulo)
 
     def draw(self, tela):
         tela.fill(COR_FUNDO)
 
         # Linha central tracejada.
-        x_centro = LARGURA // 2
-
         for y in range(0, ALTURA, 30):
             pygame.draw.rect(
                 tela,
                 (65, 70, 90),
-                (x_centro - 2, y, 4, 16)
+                (LARGURA // 2 - 2, y, 4, 16)
             )
 
         # Placar.
@@ -298,58 +336,86 @@ class Game:
         self.raquete_direita.draw(tela)
         self.bola.draw(tela)
 
-        # Instruções na parte inferior.
-        ajuda = self.fonte_ajuda.render(
-            "W / S: Jogador 1     Setas: Jogador 2     ESC: Sair",
-            True,
-            COR_TEXTO
+        self.desenhar_texto_centralizado(
+            tela,
+            "W / S: Jogador 1     Setas: Jogador 2",
+            self.fonte_ajuda,
+            COR_TEXTO,
+            ALTURA - 48
         )
 
-        tela.blit(
-            ajuda,
-            ajuda.get_rect(
-                center=(LARGURA // 2, ALTURA - 25)
-            )
+        self.desenhar_texto_centralizado(
+            tela,
+            "ESC: Sair",
+            self.fonte_ajuda,
+            COR_TEXTO,
+            ALTURA - 20
         )
+
+        # Menu inicial.
+        if self.estado == self.MENU:
+            self.desenhar_texto_centralizado(
+                tela,
+                "PONG",
+                self.fonte_titulo,
+                COR_DESTAQUE,
+                ALTURA // 2 - 75
+            )
+
+            self.desenhar_texto_centralizado(
+                tela,
+                "Pressione ENTER para iniciar o jogo",
+                self.fonte_mensagem,
+                COR_OBJETOS,
+                ALTURA // 2 + 5
+            )
+
+            self.desenhar_texto_centralizado(
+                tela,
+                f"Partida até {PONTOS_PARA_VENCER} pontos",
+                self.fonte_ajuda,
+                COR_TEXTO,
+                ALTURA // 2 + 50
+            )
+
+        # Preparação para o saque.
+        elif self.estado == self.READY:
+            self.desenhar_texto_centralizado(
+                tela,
+                "Pressione ENTER para sacar",
+                self.fonte_mensagem,
+                COR_DESTAQUE,
+                ALTURA // 2
+            )
 
         # Tela de vitória.
-        if self.vencedor is not None:
-            mensagem = self.fonte_mensagem.render(
+        elif self.estado == self.GAME_OVER:
+            self.desenhar_texto_centralizado(
+                tela,
                 f"{self.vencedor} venceu!",
-                True,
-                COR_DESTAQUE
+                self.fonte_titulo,
+                COR_DESTAQUE,
+                ALTURA // 2 - 30
             )
 
-            reiniciar = self.fonte_ajuda.render(
-                "Pressione R para jogar novamente",
-                True,
-                COR_TEXTO
+            self.desenhar_texto_centralizado(
+                tela,
+                "Pressione R para voltar ao menu",
+                self.fonte_mensagem,
+                COR_OBJETOS,
+                ALTURA // 2 + 35
             )
-
-            tela.blit(
-                mensagem,
-                mensagem.get_rect(
-                    center=(LARGURA // 2, ALTURA // 2 - 25)
-                )
-            )
-
-            tela.blit(
-                reiniciar,
-                reiniciar.get_rect(
-                    center=(LARGURA // 2, ALTURA // 2 + 20)
-                )
-            )
-
 
 # ==================================================
 # LOOP PRINCIPAL
 # ==================================================
 
+
 def main():
     pygame.init()
 
     tela = pygame.display.set_mode((LARGURA, ALTURA))
-    pygame.display.set_caption("Pong - Python e Pygame")
+    pygame.display.set_caption("Pong - Python + Pygame")
 
     relogio = pygame.time.Clock()
     jogo = Game()
@@ -357,7 +423,6 @@ def main():
     executando = True
 
     while executando:
-        # Tempo decorrido em segundos.
         delta_time = min(relogio.tick(FPS) / 1000, 0.03)
 
         for evento in pygame.event.get():
@@ -368,9 +433,14 @@ def main():
                 if evento.key == pygame.K_ESCAPE:
                     executando = False
 
-                elif evento.key == pygame.K_r:
-                    if jogo.vencedor is not None:
-                        jogo.reset()
+                elif evento.key == pygame.K_RETURN:
+                    jogo.iniciar_saque()
+
+                elif (
+                    evento.key == pygame.K_r
+                    and jogo.estado == Game.GAME_OVER
+                ):
+                    jogo.reset()
 
         jogo.update(delta_time)
         jogo.draw(tela)
@@ -382,3 +452,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
