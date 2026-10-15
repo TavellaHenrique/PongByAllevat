@@ -1,6 +1,7 @@
 
 import pygame
 import math
+import random
 
 # ==================================================
 # CONFIGURAÇÕES
@@ -21,6 +22,11 @@ COR_TEXTO = (180, 190, 210)
 LARGURA_RAQUETE = 16
 ALTURA_RAQUETE = 110
 VELOCIDADE_RAQUETE = 420
+
+# Inteligência artificial
+VELOCIDADE_IA = 300
+ERRO_IA = 35
+DISTANCIA_REACAO_IA = 360
 
 # Bola
 RAIO_BOLA = 10
@@ -61,6 +67,50 @@ class Paddle:
             self.rect,
             border_radius=5
         )
+        
+# ==================================================
+# CLASSE AICONTROLLER: Raquete da IA
+# ==================================================
+ 
+class AIController:
+    def __init__(self):
+        self.desvio = 0
+        self.direcao_anterior = 0
+
+    def update(self, raquete, bola, delta_time):
+        # A IA só precisa reagir quando a bola vem em sua direção.
+        if bola.vx > 0:
+            # Sorteia um novo erro quando a bola passa a se
+            # deslocar para a direita.
+            if self.direcao_anterior <= 0:
+                self.desvio = random.uniform(
+                    -ERRO_IA, ERRO_IA
+                )
+
+            distancia = raquete.rect.centerx - bola.x
+
+            if distancia <= DISTANCIA_REACAO_IA:
+                alvo_y = bola.y + self.desvio
+            else:
+                alvo_y = ALTURA / 2
+
+            diferenca = alvo_y - raquete.rect.centery
+
+            # Limita a velocidade de movimentação.
+            limite_movimento = VELOCIDADE_IA * delta_time
+            movimento = max(
+                -limite_movimento,
+                min(limite_movimento, diferenca)
+            )
+
+            raquete.rect.y += round(movimento)
+
+            # Mantém a raquete dentro da janela.
+            raquete.rect.clamp_ip(
+                pygame.Rect(0, 0, LARGURA, ALTURA)
+            )
+
+        self.direcao_anterior = 1 if bola.vx > 0 else -1
 
 
 # ==================================================
@@ -201,7 +251,12 @@ class Game:
         self.fonte_placar = pygame.font.Font(None, 64)
         self.fonte_mensagem = pygame.font.Font(None, 36)
         self.fonte_ajuda = pygame.font.Font(None, 26)
-
+        
+        # Modo de jogo
+        self.modo = "Computer"
+        # Controlador de movimentos da IA
+        self.ia = AIController()
+        
         self.reset()
 
     def reset(self):
@@ -251,14 +306,22 @@ class Game:
             int(teclas[pygame.K_DOWN])
             - int(teclas[pygame.K_UP])
         )
-
+        
         self.raquete_esquerda.update(
-            direcao_esquerda, delta_time
+        	direcao_esquerda, delta_time
         )
-
-        self.raquete_direita.update(
-            direcao_direita, delta_time
-        )
+        
+        if self.modo == "computer":
+        	if self.estado == self.PLAYING:
+        		self.ia.update(
+        			self.raquete_direita,
+        			self.bola,
+        			delta_time
+        		)
+        else:
+        	self.raquete_direita.update(
+        		direcao_direita, delta_time
+        	)
 
         # Durante o saque, as raquetes podem se mover,
         # mas a bola permanece parada.
@@ -335,22 +398,19 @@ class Game:
         self.raquete_esquerda.draw(tela)
         self.raquete_direita.draw(tela)
         self.bola.draw(tela)
-
-        self.desenhar_texto_centralizado(
-            tela,
-            "W / S: Jogador 1     Setas: Jogador 2",
-            self.fonte_ajuda,
-            COR_TEXTO,
-            ALTURA - 48
-        )
-
-        self.desenhar_texto_centralizado(
-            tela,
-            "ESC: Sair",
-            self.fonte_ajuda,
-            COR_TEXTO,
-            ALTURA - 20
-        )
+        
+        if self.modo == "computer":
+        	controles = "W / S: Mover raquete | ESC: Sair"
+        else:
+        	controles = "W / S: Jogador 1 | Setas: Jogador 2"
+        	
+       	self.desenhar_texto_centralizado(
+       		tela,
+       		controles,
+       		self.fonte_ajuda,
+       		COR_TEXTO,
+       		ALTURA - 48
+       	)
 
         # Menu inicial.
         if self.estado == self.MENU:
@@ -369,13 +429,27 @@ class Game:
                 COR_OBJETOS,
                 ALTURA // 2 + 5
             )
+            
+            modo_texto = (
+                "Modo: Jogador vs Computador [1]"
+                if self.modo == "computer"
+                else "Modo: Dois jogadores [2]"
+            )
+            
+            self.desenhar_texto_centralizado(
+                tela,
+                modo_texto,
+                self.fonte_ajuda,
+                COR_TEXTO,
+                ALTURA // 2 + 50
+            )
 
             self.desenhar_texto_centralizado(
                 tela,
                 f"Partida até {PONTOS_PARA_VENCER} pontos",
                 self.fonte_ajuda,
                 COR_TEXTO,
-                ALTURA // 2 + 50
+                ALTURA // 2 + 85
             )
 
         # Preparação para o saque.
@@ -428,19 +502,27 @@ def main():
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 executando = False
-
+                
             elif evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_ESCAPE:
-                    executando = False
-
-                elif evento.key == pygame.K_RETURN:
-                    jogo.iniciar_saque()
-
-                elif (
-                    evento.key == pygame.K_r
-                    and jogo.estado == Game.GAME_OVER
-                ):
-                    jogo.reset()
+            	if evento.key == pygame.K_ESCAPE:
+            		executando = False
+            		
+            	elif evento.key == pygame.K_1:
+            		if jogo.estado == Game.MENU:
+            			jogo.modo = "computer"
+            	
+            	elif evento.key == pygame.K_2:
+            		if jogo.estado == Game.MENU:
+            			jogo.modo = "two_players"
+            	
+            	elif evento.key == pygame.K_RETURN:
+            		jogo.iniciar_saque()
+            	
+            	elif (
+            		evento.key == pygame.K_r
+            		and jogo.estado == Game.GAME_OVER
+            	):
+            		jogo.reset()
 
         jogo.update(delta_time)
         jogo.draw(tela)
