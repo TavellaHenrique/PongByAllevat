@@ -37,3 +37,6 @@ class Paddle:
             self.rect,
             border_radius=5
         )
+
+    def reset(self):
+        self.rect.y = ALTURA // 2 - ALTURA_RAQUETE // 2
