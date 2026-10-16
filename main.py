@@ -14,8 +14,10 @@ from game import Game
 
 def main():
     pygame.init()
-
+    
     tela = pygame.display.set_mode((LARGURA, ALTURA))
+
+    # Título da janela
     pygame.display.set_caption("Pong - Python + Pygame")
 
     relogio = pygame.time.Clock()
@@ -53,7 +55,8 @@ def main():
                 elif evento.key == pygame.K_RIGHT:
                     if jogo.estado == Game.MENU:
                         jogo.pontos_para_vencer += 1
-                
+
+                # Altera o tema do jogo na tela de Menu
                 elif evento.key == pygame.K_UP:
                     if jogo.estado == Game.MENU:
                         jogo.alterar_tema(-1)
