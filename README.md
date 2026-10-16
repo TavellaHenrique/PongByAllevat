@@ -13,7 +13,7 @@ Jogo desenvolvido em Python com Pygame, inspirado no arcade clássico Pong.
 
 ## Como executar pela primeira vez
 1. Faça o download dos arquivos no Git
-2. Abra um terminal na pasta PongGame
+2. Abra um terminal na raíz da pasta
 3. Crie e ative um ambiente virtual
    - python3 -m venv .venv
    - source .venv/bin/activate
