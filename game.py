@@ -6,10 +6,7 @@ from config import (
 	ALTURA,
 	ALTURA_RAQUETE,
 	LARGURA_RAQUETE,
-	COR_FUNDO,
-	COR_OBJETOS,
-	COR_DESTAQUE,
-	COR_TEXTO,
+	TEMAS,
 	PONTOS_PARA_VENCER,
 )
 
@@ -29,8 +26,10 @@ class Game:
         self.fonte_mensagem = pygame.font.Font(None, 36)
         self.fonte_ajuda = pygame.font.Font(None, 26)
         
+        self.indice_tema = 0
+        
         # Modo de jogo inicialmente selecionado
-        self.modo = "Computer"
+        self.modo = "computer"
         # Conecta o controlador da IA
         self.ia = AIController()
         
@@ -52,8 +51,8 @@ class Game:
 
         self.bola = Ball()
 
-        self.placar_esquerda = 0
-        self.placar_direita = 0
+        self.placar_esquerda = int(0)
+        self.placar_direita = int(0)
         self.vencedor = None
 
         # O jogo começa no menu, sem movimentar a bola.
@@ -86,22 +85,20 @@ class Game:
             int(teclas[pygame.K_DOWN])
             - int(teclas[pygame.K_UP])
         )
-        
+
         self.raquete_esquerda.update(
         	direcao_esquerda, delta_time
         )
-        
+
         if self.modo == "computer":
-        	if self.estado == self.PLAYING:
-        		self.ia.update(
-        			self.raquete_direita,
-        			self.bola,
-        			delta_time
-        		)
+                    if self.estado == self.PLAYING:
+                        self.ia.update(
+                            self.raquete_direita,
+                            self.bola,
+                            delta_time
+                        )
         else:
-        	self.raquete_direita.update(
-        		direcao_direita, delta_time
-        	)
+            self.raquete_direita.update(direcao_direita, delta_time)
 
         # Durante o saque, as raquetes podem se mover,
         # mas a bola permanece parada.
@@ -146,9 +143,15 @@ class Game:
         tela.blit(superficie, retangulo)
 
     def draw(self, tela):
-        tela.fill(COR_FUNDO)
+        tema = TEMAS[self.indice_tema]
 
-        # Linha central tracejada.
+        cor_fundo = tema["fundo"]
+        cor_objetos = tema["objetos"]
+        cor_destaque = tema["destaque"]
+        cor_texto = tema["texto"]
+
+        tela.fill(cor_fundo)
+
         for y in range(0, ALTURA, 30):
             pygame.draw.rect(
                 tela,
@@ -156,13 +159,12 @@ class Game:
                 (LARGURA // 2 - 2, y, 4, 16)
             )
 
-        # Placar.
         texto_esquerda = self.fonte_placar.render(
-            str(self.placar_esquerda), True, COR_TEXTO
+            str(self.placar_esquerda), True, cor_texto
         )
 
         texto_direita = self.fonte_placar.render(
-            str(self.placar_direita), True, COR_TEXTO
+            str(self.placar_direita), True, cor_texto
         )
 
         tela.blit(
@@ -175,38 +177,38 @@ class Game:
             (LARGURA // 2 + 45, 35)
         )
 
-        self.raquete_esquerda.draw(tela)
-        self.raquete_direita.draw(tela)
-        self.bola.draw(tela)
-        
+        self.raquete_esquerda.draw(tela, cor_objetos)
+        self.raquete_direita.draw(tela, cor_objetos)
+        self.bola.draw(tela, cor_destaque)
+
         if self.modo == "computer":
-        	controles = "[W/S: Mover raquete]"
+            controles = "[W/S: Mover raquete]"
         else:
-        	controles = "[W/S: Jogador 1] [Setas: Jogador 2]"
-        	
-       	self.desenhar_texto_centralizado(
-       		tela,
-       		controles,
-       		self.fonte_ajuda,
-       		COR_TEXTO,
-       		ALTURA - 48
-       	)
-       	
-       	self.desenhar_texto_centralizado(
-       		tela,
-       		"[R: Voltar ao menu] [ESC: Sair]",
-       		self.fonte_ajuda,
-       		COR_TEXTO,
-       		ALTURA - 20
-       	)
+            controles = "[W/S: Jogador 1] [Setas: Jogador 2]"
+
+        self.desenhar_texto_centralizado(
+            tela,
+            controles,
+            self.fonte_ajuda,
+            cor_texto,
+            ALTURA - 48
+        )
+
+        self.desenhar_texto_centralizado(
+            tela,
+            "[R: Voltar ao menu] [ESC: Sair]",
+            self.fonte_ajuda,
+            cor_texto,
+            ALTURA - 20
+        )
 
         # Menu inicial.
         if self.estado == self.MENU:
             self.desenhar_texto_centralizado(
                 tela,
-                "PONG",
+                "PONG by Allevat",
                 self.fonte_titulo,
-                COR_DESTAQUE,
+                cor_destaque,
                 ALTURA // 2 - 75
             )
 
@@ -214,7 +216,7 @@ class Game:
                 tela,
                 "Pressione ENTER para iniciar o jogo",
                 self.fonte_mensagem,
-                COR_OBJETOS,
+                cor_objetos,
                 ALTURA // 2 - 30
             )
             
@@ -229,7 +231,7 @@ class Game:
                 tela,
                 modo_texto,
                 self.fonte_ajuda,
-                COR_DESTAQUE,
+                cor_destaque,
                 ALTURA // 2 + 45
             )
             
@@ -237,7 +239,7 @@ class Game:
             	tela,
             	"[1] Contra computador [2] Contra jogador",
             	self.fonte_ajuda,
-            	COR_TEXTO,
+            	cor_texto,
             	ALTURA // 2 + 65
             )
             
@@ -247,7 +249,7 @@ class Game:
                 tela,
                 pontos_texto,
                 self.fonte_ajuda,
-                COR_DESTAQUE,
+                cor_destaque,
                 ALTURA // 2 + 100
             )
             
@@ -255,8 +257,28 @@ class Game:
             	tela,
             	"[Setas ESQUERDA/DIREITA]",
             	self.fonte_ajuda,
-            	COR_TEXTO,
+            	cor_texto,
             	ALTURA // 2 + 120
+            )
+
+            tema_texto = (
+                f"Tema: {TEMAS[self.indice_tema]['nome']}"
+            )
+
+            self.desenhar_texto_centralizado(
+                tela,
+                tema_texto,
+                self.fonte_ajuda,
+                cor_destaque,
+                ALTURA // 2 + 155
+            )
+
+            self.desenhar_texto_centralizado (
+                tela,
+                "[Setas CIMA/BAIXO]",
+                self.fonte_ajuda,
+                cor_texto,
+                ALTURA // 2 + 175
             )
 
         # Preparação para o saque.
@@ -265,7 +287,7 @@ class Game:
                 tela,
                 "Pressione ENTER para sacar",
                 self.fonte_mensagem,
-                COR_DESTAQUE,
+                cor_destaque,
                 ALTURA // 2 + 30
             )
 
@@ -275,7 +297,7 @@ class Game:
                 tela,
                 f"{self.vencedor} venceu!",
                 self.fonte_titulo,
-                COR_DESTAQUE,
+                cor_destaque,
                 ALTURA // 2 - 30
             )
 
@@ -283,14 +305,17 @@ class Game:
                 tela,
                 "Pressione R para voltar ao menu",
                 self.fonte_mensagem,
-                COR_OBJETOS,
+                cor_objetos,
                 ALTURA // 2 + 35
             )
-            
+
+    def alterar_tema(self, direcao):
+        self.indice_tema = (self.indice_tema + direcao) % len(TEMAS)
+
     def voltar_ao_menu(self):
-    	self.estado = self.MENU
-    	self.placar_esquerda = 0
-    	self.placar_direita = 0
-    	self.vencedor = None
-    	self.bola.reset()
+        self.estado = self.MENU
+        self.placar_esquerda = 0
+        self.placar_direita = 0
+        self.vencedor = None
+        self.bola.reset()
     	

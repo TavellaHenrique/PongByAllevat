@@ -5,8 +5,6 @@ import pygame
 from config import (
 	LARGURA,
 	ALTURA,
-	COR_OBJETOS,
-	COR_DESTAQUE,
 	ALTURA_RAQUETE,
 	RAIO_BOLA,
 	VELOCIDADE_INICIAL_BOLA,
@@ -127,10 +125,10 @@ class Ball:
 
         self.vy = math.sin(angulo) * nova_velocidade
 
-    def draw(self, tela):
+    def draw(self, tela, cor):
         pygame.draw.circle(
             tela,
-            COR_DESTAQUE,
+            cor,
             (round(self.x), round(self.y)),
             RAIO_BOLA
         )

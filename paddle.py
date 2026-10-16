@@ -7,7 +7,6 @@ from config import (
 	LARGURA_RAQUETE,
 	ALTURA_RAQUETE,
 	VELOCIDADE_RAQUETE,
-	COR_OBJETOS
 )
 
 # ==================================================
@@ -31,10 +30,10 @@ class Paddle:
         # Mantém a raquete dentro da janela.
         self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA, ALTURA))
 
-    def draw(self, tela):
+    def draw(self, tela, cor):
         pygame.draw.rect(
             tela,
-            COR_OBJETOS,
+            cor,
             self.rect,
             border_radius=5
         )
