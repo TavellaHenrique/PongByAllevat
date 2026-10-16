@@ -30,12 +30,6 @@ ANGULO_MAXIMO = math.radians(60)
 # Condições de vitórias
 PONTOS_PARA_VENCER = 5
 
-# Cores
-COR_FUNDO = (18, 20, 30)
-COR_OBJETOS = (235, 240, 255)
-COR_DESTAQUE = (80, 230, 230)
-COR_TEXTO = (180, 190, 210)
-
 TEMAS = [
 	{
 		"nome": "Clássico",
