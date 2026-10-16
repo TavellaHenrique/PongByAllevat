@@ -170,12 +170,12 @@ class Game:
 
         tela.blit(
             texto_esquerda,
-            (LARGURA // 2 - 80, 35)
+            (LARGURA // 2 - 85, 35)
         )
 
         tela.blit(
             texto_direita,
-            (LARGURA // 2 + 45, 35)
+            (LARGURA // 2 + 60, 35)
         )
 
         self.raquete_esquerda.draw(tela, cor_objetos)
@@ -319,6 +319,8 @@ class Game:
         self.estado = self.MENU
         self.placar_esquerda = 0
         self.placar_direita = 0
+        self.raquete_esquerda.reset()
+        self.raquete_direita.reset()
         self.vencedor = None
         self.bola.reset()
     	
