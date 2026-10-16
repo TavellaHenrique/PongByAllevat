@@ -1,3 +1,36 @@
 
+# Ambiente virtual Python
 .venv/
+venv/
+env/
+
+# Cache e arquivos compilados do Python
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Ambientes e ferramentas de teste
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Configurações locais do VS Code
+.vscode/*
+!.vscode/extensions.json
+
+# Arquivos temporários e de backup
+*.tmp
+*.bak
+*~
+.DS_Store
+Thumbs.db
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
