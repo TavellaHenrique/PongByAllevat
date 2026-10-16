@@ -45,11 +45,25 @@ TEMAS = [
 		"texto": (180, 190, 210),
 	},
 	{
-		"nome": "Claro",
+		"nome": "Gelo",
 		"fundo": (240, 242, 245),
 		"objetos": (35, 40, 55),
 		"destaque": (35, 100, 220),
 		"texto": (70, 75, 90),
 	},
+    {
+        "nome": "Futuro Retrô",
+        "fundo": (16, 10, 35),
+        "objetos": (0, 240, 255),
+        "destaque": (255, 45, 160),
+        "texto": (210, 190, 255),
+    },
+    {
+        "nome": "Halloween",
+        "fundo": (10, 10, 10),
+        "objetos": (230, 215, 112),
+        "destaque": (255, 125, 75),
+        "texto": (230, 215, 112),
+    },
 ]
 

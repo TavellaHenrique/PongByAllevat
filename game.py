@@ -152,12 +152,13 @@ class Game:
 
         tela.fill(cor_fundo)
 
-        for y in range(0, ALTURA, 30):
-            pygame.draw.rect(
-                tela,
-                (65, 70, 90),
-                (LARGURA // 2 - 2, y, 4, 16)
-            )
+        if self.estado not in [Game.MENU, Game.GAME_OVER]:
+            for y in range(0, ALTURA, 30):
+                pygame.draw.rect(
+                    tela,
+                    cor_texto,
+                    (LARGURA // 2 - 2, y, 4, 16)
+                )
 
         texto_esquerda = self.fonte_placar.render(
             str(self.placar_esquerda), True, cor_texto
@@ -179,7 +180,9 @@ class Game:
 
         self.raquete_esquerda.draw(tela, cor_objetos)
         self.raquete_direita.draw(tela, cor_objetos)
-        self.bola.draw(tela, cor_destaque)
+        
+        if self.estado not in [Game.MENU, Game.GAME_OVER]:
+            self.bola.draw(tela, cor_destaque)
 
         if self.modo == "computer":
             controles = "[W/S: Mover raquete]"
