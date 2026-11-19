@@ -18,7 +18,7 @@ def main():
     tela = pygame.display.set_mode((LARGURA, ALTURA))
 
     # Título da janela
-    pygame.display.set_caption("Pong - Python + Pygame")
+    pygame.display.set_caption("Pong By Allevat")
 
     relogio = pygame.time.Clock()
     jogo = Game()
