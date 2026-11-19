@@ -72,13 +72,6 @@ def main():
                 elif evento.key == pygame.K_r:
                     if jogo.estado != Game.MENU:
                         jogo.voltar_ao_menu()
-                
-                # Tecla para reiniciar o jogo ao terminar partida
-                elif (
-                    evento.key == pygame.K_r
-                    and jogo.estado == Game.GAME_OVER
-                ):
-                    jogo.reset()
 
         jogo.update(delta_time)
         jogo.draw(tela)
