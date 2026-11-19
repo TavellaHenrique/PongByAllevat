@@ -1,0 +1,60 @@
+
+# Define the workflow name displayed in GitHub Actions.
+name: Build Linux Release
+
+# Trigger the workflow when a GitHub Release is published.
+on:
+  release:
+    types: [published]
+
+# Define the permissions required by the workflow.
+permissions:
+  contents: write
+
+# Define the workflow jobs.
+jobs:
+  build-linux:
+    # Use a GitHub-hosted Ubuntu runner.
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the source code associated with the release tag.
+      - name: Checkout source code
+        uses: actions/checkout@v7
+
+      # Set up the Python version used by the project.
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      # Install the project dependencies and PyInstaller.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pyinstaller
+
+      # Build the standalone Linux executable.
+      - name: Build executable
+        run: |
+          pyinstaller \
+            --clean \
+            --noconfirm \
+            --onefile \
+            --name Pong \
+            main.py
+
+      # Rename the executable to include the release version.
+      - name: Rename executable
+        run: |
+          mv dist/Pong "Pong-By-Allevat-${GITHUB_REF_NAME}-linux-x86_64"
+          chmod +x "Pong-By-Allevat-${GITHUB_REF_NAME}-linux-x86_64"
+
+      # Upload the executable to the published GitHub Release.
+      - name: Upload release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${GITHUB_REF_NAME}" \
+            "Pong-By-Allevat-${GITHUB_REF_NAME}-linux-x86_64"
