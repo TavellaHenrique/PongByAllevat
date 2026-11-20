@@ -16,6 +16,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v7
       
+
       - name: Download baseline Python runtime
         shell: bash
         run: |
@@ -26,16 +27,28 @@ jobs:
             https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest \
             | jq -r '.tag_name')
 
-          # Find the CPython 3.12 baseline x86-64 GNU runtime.
+          echo "Standalone Python release: $RELEASE_TAG"
+
+          # Retrieve release assets and select the baseline CPython 3.12 archive.
           DOWNLOAD_URL=$(curl -fsSL \
             "https://api.github.com/repos/astral-sh/python-build-standalone/releases/tags/${RELEASE_TAG}" \
             | jq -r '.assets[].browser_download_url
-              | select(test("cpython-3\\.12\\.[0-9]+\\+.*-x86_64-unknown-linux-gnu-install_only_stripped\\.tar\\.gz$"))')
+              | select(
+                  contains("cpython-3.12.")
+                  and contains("-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz")
+                )')
 
           if [ -z "$DOWNLOAD_URL" ]; then
             echo "Compatible Python runtime was not found."
+            echo "Available matching assets:"
+            curl -fsSL \
+              "https://api.github.com/repos/astral-sh/python-build-standalone/releases/tags/${RELEASE_TAG}" \
+              | jq -r '.assets[].name
+                | select(contains("cpython-3.12.") and contains("x86_64-unknown-linux"))'
             exit 1
           fi
+
+          echo "Selected Python runtime: $DOWNLOAD_URL"
 
           # Download and extract the standalone Python runtime.
           mkdir -p "$RUNNER_TEMP/python-runtime"
@@ -54,6 +67,7 @@ jobs:
 
           # Export the executable path for subsequent workflow steps.
           echo "PYTHON_BIN=$PYTHON_BIN" >> "$GITHUB_ENV"
+
 
       - name: Verify Python runtime
         run: |
