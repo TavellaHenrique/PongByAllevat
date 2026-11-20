@@ -15,7 +15,6 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v7
-
       
       - name: Download baseline Python runtime
         shell: bash
@@ -62,6 +61,8 @@ jobs:
           "$PYTHON_BIN" -c "import platform; print(platform.machine())"
 
       - name: Install dependencies
+        env:
+          PYGAME_DETECT_AVX2: ""
         run: |
           "$PYTHON_BIN" -m pip install --upgrade pip
           "$PYTHON_BIN" -m pip install -r requirements.txt
